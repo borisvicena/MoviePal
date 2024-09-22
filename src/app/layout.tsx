@@ -5,7 +5,7 @@ import "./globals.css";
 const rubik = localFont({
   src: "./fonts/Rubik.ttf",
   variable: "--font-rubik",
-  weight: "100 300 400 600 700",
+  weight: "400 700",
 });
 
 export const metadata: Metadata = {
@@ -19,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="dim" className="dark">
       <body className={`${rubik.variable} antialiased`}>{children}</body>
     </html>
   );
