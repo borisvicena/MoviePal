@@ -1,173 +1,46 @@
 "use client";
-import React, { useState } from "react";
-import axios from "axios";
-import { clear } from "console";
-
-const avatar = {
-  src: "icon.png",
-  alt: "MoviePal",
-};
-
-interface Item {
-  id: string;
-  title: string;
-  name: string;
-  release_date?: string;
-  first_air_date?: string;
-  poster_path: string;
-}
-
-const API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
-
-const getRecommendations = async ({ title, type }: { title: string; type: string }) => {
-  try {
-    const searchResponse = await axios.get(
-      `https://api.themoviedb.org/3/search/${type}?api_key=${API_KEY}&query=${encodeURIComponent(title)}`
-    );
-
-    if (searchResponse.data.results.length > 0) {
-      const itemId = searchResponse.data.results[0].id;
-      const searchedItem = searchResponse.data.results[0];
-
-      const recommendationsResponse = await axios.get(
-        `https://api.themoviedb.org/3/${type}/${itemId}/recommendations?api_key=${API_KEY}`
-      );
-
-      return [searchedItem, ...recommendationsResponse.data.results];
-    } else {
-      console.log(`${type.charAt(0).toUpperCase() + type.slice(1)} not found`);
-      return [];
-    }
-  } catch (error) {
-    console.error("Error fetching data: ", error);
-    return [];
-  }
-};
+import React from "react";
+import Navbar from "@/components/Navbar";
+import Search from "@/components/Search";
 
 export default function Home() {
-  const [movieTitle, setMovieTitle] = useState("");
-  const [recommendations, setRecommendations] = useState<Item[]>([]);
-  const [searchType, setSearchType] = useState("movie");
-  const [loading, setLoading] = useState(false);
-  const [loadingProgress, setLoadingProgress] = useState(0);
-
-  const handleSearch = async () => {
-    const recommendedItems = await getRecommendations({ title: movieTitle, type: searchType });
-    setRecommendations(recommendedItems);
-  };
-
-  const handleReload = () => {
-    setLoading(true);
-    setLoadingProgress(0);
-
-    const incrementProgress = () => {
-      setLoadingProgress((prevProgress) => {
-        if (prevProgress >= 100) {
-          window.location.reload(); // Reload once progress is complete
-          return 100;
-        }
-        return prevProgress + 2; // Smaller increment for smoother transition
-      });
-    };
-
-    const startProgress = () => {
-      if (loadingProgress < 100) {
-        incrementProgress();
-        requestAnimationFrame(startProgress); // Use requestAnimationFrame for smoother updates
-      }
-    };
-
-    startProgress(); // Start the progress
-  };
-
   return (
     <>
-      {loading && (
-        <progress
-          className="progress progress-info w-full fixed top-0 left-0 z-50"
-          value={loadingProgress}
-          max="100"
-        ></progress>
-      )}
-      <header className="w-full my-4 px-4 md:pt-4">
-        <div className="navbar justify-between bg-base-200 text-base-content rounded-box w-full max-w-xl mx-auto">
-          <div className="flex-none">
-            <button className="btn btn-square btn-ghost" onClick={handleReload}>
-              <img src={avatar.src} alt={avatar.alt} className="w-10 h-10 rounded-full" />
+      <Navbar />
+      <div className="hero mt-20">
+        <div className="hero-content text-center">
+          <div className="max-w-xl">
+            <h1 className="text-5xl font-bold">
+              Discover Your Next <span className="text-accent">&nbsp;Favorite Movie&nbsp;</span>🚀
+            </h1>
+            <p className="py-6">
+              Unlock a world of personalized movie and TV show recommendations tailored just for you. Simply enter the
+              title of a movie or show you love, and let MoviePal guide you to new and exciting content that matches
+              your taste.
+            </p>
+            <button className="btn btn-accent">
+              <a href="#search">Get Started</a>
             </button>
-          </div>
-          <div className="flex-none" onClick={handleReload}>
-            <a className="normal-case font-bold text-lg btn btn-ghost tracking-tight">Movie Pal</a>
-          </div>
-          <div className="flex-none">
-            <button className=" btn btn-square btn-ghost swap swap-rotate">
-              {/* this hidden checkbox controls the state */}
-              <input type="checkbox" className="theme-controller" value="synthwave" />
-
-              {/* sun icon */}
-              <svg className="swap-off h-7 w-7 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z" />
-              </svg>
-
-              {/* moon icon */}
-              <svg className="swap-on h-7 w-7 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z" />
-              </svg>
-            </button>
+            <svg
+              viewBox="0 0 68 77"
+              xmlns="http://www.w3.org/2000/svg"
+              className="text-center mx-auto -rotate-12 mt-8 w-12 h-full fill-current scale-x-100 pt-3 text-primary"
+            >
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M36.4058 21.9334L41.1332 16.3559C39.2314 17.9379 37.6704 19.8143 36.4058 21.9334ZM23.1688 30.9494C25.2167 29.029 27.1793 27.057 29.4146 25.3858C26.7801 26.6313 24.9064 28.7351 23.1688 30.9494ZM33.2576 34.8628C33.7854 35.8059 34.3218 35.3399 34.8298 34.9399C36.5485 33.5884 36.678 31.5876 36.7834 29.6735C36.8603 28.2784 36.7645 26.8185 36.0412 25.5301C35.7657 25.0387 35.412 24.7259 34.9817 25.4387C33.8074 27.3851 32.9252 29.4359 32.76 31.7319C32.6813 32.8257 32.8093 33.9015 33.2576 34.8628ZM30.044 26.4983C28.4758 27.3028 27.2555 28.5674 26.0094 29.7814C20.6252 35.0274 17.2489 41.4539 14.905 48.5197C13.3395 53.2397 12.2395 58.0626 11.3075 62.9339C11.2221 63.3783 11.1535 63.8311 10.8458 64.1895C10.4999 64.592 10.1735 64.7341 10.044 64.0384C10.0116 63.8672 10.1324 63.62 9.81447 63.6931C8.71764 63.9447 8.57833 63.1202 8.38728 62.4074C8.02827 61.0698 8.27652 59.7088 8.39131 58.3751C8.71242 54.6385 9.17526 50.9104 10.1232 47.2754C11.0034 43.9008 12.3627 40.6916 13.8111 37.5224C14.7331 35.505 15.6989 33.4657 17.2506 31.8988C18.2815 30.8578 18.8385 29.5395 19.8363 28.51C21.7493 26.5365 23.6757 24.5912 25.9913 23.0773C27.8973 21.8315 29.9825 21.148 32.2609 21.1387C33.0121 21.1359 33.5561 20.852 33.993 20.285C35.171 18.7574 36.4016 17.263 37.6421 15.7973C39.6599 13.4123 42.0469 11.3584 44.4974 9.40976C48.406 6.30179 52.5732 3.62757 57.3413 2.00582C60.1437 1.05265 62.9687 0.295021 65.9574 1.11102C66.7443 1.32581 67.4328 1.66676 67.8401 2.42598C68.016 2.75297 68.0549 3.05479 67.8179 3.37093C67.5375 3.74424 67.3526 3.49944 67.042 3.35738C64.9118 2.3824 62.9132 3.24742 60.9212 3.90867C55.4318 5.7307 50.8176 9.01166 46.4398 12.6746C43.0898 15.4778 40.0455 18.5808 37.3679 22.0365C37.1552 22.3109 36.7658 22.5228 37.3009 22.9146C39.1654 24.2792 40.116 26.2265 40.5107 28.4278C41.1203 31.8255 40.7845 35.0594 38.2512 37.6832C36.8901 39.0932 35.496 39.1912 33.7364 38.3538C29.2533 36.221 28.3904 31.6356 29.8533 27.7477C29.9848 27.3997 30.1159 27.0518 30.2468 26.7046C30.1792 26.6355 30.1114 26.567 30.044 26.4983Z"
+              ></path>
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M12.7396 69.066C11.1773 70.7696 9.87903 72.6455 8.96903 74.7731C10.2258 72.8709 11.4825 70.9684 12.7396 69.066ZM4.16018 63.3217C5.28587 65.375 6.04163 67.5845 6.8814 69.7589C7.00686 70.0839 6.98214 70.5315 7.50699 70.5757C8.01112 70.618 8.14131 70.2023 8.2923 69.9013C9.11672 68.2617 10.3763 66.9558 11.4775 65.5213C12.1728 64.6148 12.7024 63.5696 13.4452 62.6601C14.5892 61.2601 15.6297 59.7727 16.6756 58.2955C17.2058 57.547 18.0634 57.0791 18.326 56.0843C18.5838 55.1085 19.3593 54.91 20.7139 55.5058C21.4054 55.8096 21.9699 56.4212 21.6002 57.3018C21.2961 58.026 20.9306 58.7392 20.4918 59.389C17.5869 63.6895 14.6474 67.9665 11.7376 72.2636C11.0844 73.228 10.4955 74.2376 9.88906 75.2334C8.78653 77.0441 7.96815 77.2015 6.16577 76.0678C4.76664 75.1877 3.99186 73.9692 3.66283 72.3613C3.02909 69.2664 2.30718 66.1894 1.09654 63.2558C0.853796 62.668 0.528696 62.1149 0.262714 61.5357C-0.0458552 60.8654 0.158774 60.5306 0.921301 60.5897C2.61148 60.7196 2.87504 60.94 4.16018 63.3217Z"
+              ></path>
+            </svg>
           </div>
         </div>
-        <div className="w-full flex justify-center items-center">
-          <div className="mt-20 w-full flex flex-col justify-center items-center max-w-xl">
-            <div className="inline-flex w-full gap-2">
-              <select
-                value={searchType}
-                onChange={(e) => setSearchType(e.target.value)}
-                className="select select-bordered"
-              >
-                <option value="movie">Movies</option>
-                <option value="tv">TV Shows</option>
-              </select>
-              <input
-                type="text"
-                placeholder="Enter a movie title"
-                className="input input-bordered w-full"
-                value={movieTitle}
-                onChange={(e) => setMovieTitle(e.target.value)}
-              />
-            </div>
-
-            <button className="btn btn-neutral w-full mt-2" onClick={handleSearch}>
-              Get recommendation
-            </button>
-          </div>
-        </div>
-        <div className="w-full max-w-screen-lg mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
-          {recommendations.length > 0 ? (
-            recommendations.map((item: Item) => (
-              <div
-                key={item.id}
-                className="card bg-base-200 hover:shadow-xl transition-shadow duration-300 rounded-lg overflow-hidden"
-              >
-                <figure>
-                  <img
-                    src={`https://image.tmdb.org/t/p/original${item.poster_path}`}
-                    alt={item.title || item.name}
-                    className="w-full h-full object-cover"
-                  />
-                </figure>
-                <div className="card-body p-4">
-                  <h2 className="card-title text-lg font-semibold text-white">{item.title || item.name}</h2>
-                  <p className="text-accent">
-                    Year: <span className="font-medium">{item.release_date || item.first_air_date}</span>
-                  </p>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-600 text-center">No recommendations found</p>
-          )}
-        </div>
-      </header>
+      </div>
+      <Search />
     </>
   );
 }
